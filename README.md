@@ -23,14 +23,14 @@ npx cap sync
 ### authenticate(...)
 
 ```typescript
-authenticate(options: { url: string; customScheme?: string; }) => any
+authenticate(options: { url: string; customScheme?: string; redirectUri?: string; }) => Promise<{ url: string; }>
 ```
 
-| Param         | Type                                                 |
-| ------------- | ---------------------------------------------------- |
-| **`options`** | <code>{ url: string; customScheme?: string; }</code> |
+| Param         | Type                                                                       |
+| ------------- | -------------------------------------------------------------------------- |
+| **`options`** | <code>{ url: string; customScheme?: string; redirectUri?: string; }</code> |
 
-**Returns:** <code>any</code>
+**Returns:** <code>Promise&lt;{ url: string; }&gt;</code>
 
 --------------------
 
