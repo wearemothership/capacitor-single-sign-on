@@ -3,6 +3,7 @@ export interface SingleSignOnPlugin {
         options: {
             url: string;
             customScheme?: string;
+            redirectUri?: string;
         }
     ): Promise<{ url: string }>;
 }

@@ -6,39 +6,44 @@ import AuthenticationServices
 typealias JSObject = [String:Any]
 @objc(SingleSignOnPlugin)
 public class SingleSignOnPlugin: CAPPlugin, ASWebAuthenticationPresentationContextProviding {
-
-    @available(iOS 12.0, *)
     public func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        return DispatchQueue.main.sync {
-           return UIApplication.shared.keyWindow!
-        }
+        return self.webView!.window!
     }
     
-    private var session: Any?
+    private var session: ASWebAuthenticationSession?
 
     @objc func authenticate(_ call: CAPPluginCall) {
-        let url = call.getString("url") ?? ""
-        let scheme = call.getString("customScheme") ?? ""
+        guard let url = URL(string: call.getString("url") ?? "") else {
+            call.reject("invalid url")
+            return
+        }
         
-        if #available(iOS 12.0, *) {
-            self.session = ASWebAuthenticationSession.init(url: URL(string: url)!, callbackURLScheme: scheme, completionHandler: { url, error in
+        guard let redirectUri = URL(string: call.getString("redirectUri") ?? ""),
+              let host = redirectUri.host
+              else {
+            call.reject("invalid redirect uri")
+            return
+        }
+        
+        if #available(iOS 17.4, *) {
+            let session = ASWebAuthenticationSession.init(url: url, callback: .https(host: host, path: redirectUri.path)) { url, error in
                 if (error != nil) {
-                    call.reject("Error", error?.localizedDescription)
+                    call.reject("")
                 }
                 else {
                     var response = JSObject()
                     response["url"] = url?.absoluteString
                     call.resolve(response)
                 }
-            })
-            if #available(iOS 13.0, *) {
-                (self.session as! ASWebAuthenticationSession).presentationContextProvider = self
             }
-            (self.session as! ASWebAuthenticationSession).start()
-        }
-        else {
-            call.error("Not supported")
+            session.presentationContextProvider = self
+            DispatchQueue.main.async {
+                session.start()
+            }
+            self.session = session
+        } else {
+            // Fallback on earlier versions
+            call.reject("Needs iOS >= 17.4")
         }
     }
-
 }
