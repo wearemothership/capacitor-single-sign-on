@@ -1,6 +1,6 @@
 {
     "name": "@wearemothership/capacitor-single-signon",
-    "version": "1.1.1",
+    "version": "2.0.1",
     "description": "This plugin is designed to streamline the single signon process between android and ios",
 	"type": "module",
     "main": "dist/plugin.cjs.js",
